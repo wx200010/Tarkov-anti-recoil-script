@@ -6,15 +6,15 @@ import keyboard
 import weapons
 from pynput.mouse import Listener
 
-PrimaryWeapon = 'SR3M'.upper()
-SecondWeapon = 'SR3M'.upper()
+PrimaryWeapon = 'SR3M'.upper()  #  primary weapon's name
+SecondWeapon = 'SR3M'.upper()   #  secondary weapon's name
 
-Flexible = [True, True]
-HighMode = [False, True]
-counterRate = [0.5, 0.6, 0.75, 1.0, 1.35, 1.8, 2.4, 3.0, 4.1, 5.6 ]
-Number = 0
-counter = 0
-last_scroll_time = [-1000, -2000, -3000]  # 記錄上次滾輪事件的時間
+Flexible = [True, True]     # True : variable zoom scope,    False: Non-variable zoom scope
+HighMode = [False, True]    # True : >1x scope,             False: 1x scope
+counterRate = [0.5, 0.6, 0.75, 1.0, 1.35, 1.8, 2.4, 3.0, 4.1, 5.6 ] # the offset for variable zoom scope
+Number = 0          # The weapon index which you are using currently        
+counter = 0         # The current zoom level of your variable zoom scope  (approximate 0~9)
+last_scroll_time = [-1000, -2000, -3000]  # Record the last 3 time you scrolled the mousewhell
 
 def main():
     global Weapon, HighMode, Number, counter
@@ -27,16 +27,16 @@ def main():
         elif keyboard.is_pressed('3') and SecondWeapon != '':
             Number = 1
             Weapon = SecondWeapon
-        elif (win32api.GetKeyState(0x05) < 0) :
+        elif (win32api.GetKeyState(0x05) < 0) :         # Use mouse side button (Back Button) to switch HighMode
             if Weapon != '' :  
                 HighMode[Number] = not HighMode[Number]
                 print(HighMode[Number])
-                time.sleep(0.2)
+                time.sleep(0.2)                         # Avoid switching repeatly in short time
         a = win32api.GetKeyState(0x01)
         b = win32api.GetKeyState(0x02)
-        # 按下右鍵開始射擊
-        if b < 0 and a < 0:
-            # 突擊步槍
+        # Cheking Right-click and Left-Click
+        if b < 0 and a < 0:  # If you are aimming and firing!
+            # Assault-rifle's offset
             if 'SPEAR'      in Weapon:
                 offset, duration = 7, 28
             elif 'M4A1'     in Weapon:
@@ -49,7 +49,7 @@ def main():
                 offset, duration = 7, 33
             elif 'MK17'     in Weapon:
                 offset, duration = 5, 33
-            # SMG衝鋒槍
+            # SMG's offset
             elif 'SR3M'     in Weapon:
                 offset, duration = 7, 26
             elif 'UZI'  in Weapon:
@@ -59,21 +59,24 @@ def main():
             elif 'VECTOR'    in Weapon:
                 offset, duration = 5, 22
         
-            if 'HOT' in Weapon:
+            if 'HOT' in Weapon:        
                 if HighMode[Number]:
-                    weapons.fire(offset, duration)
+                    weapons.fire(offset, duration)      # 1x offset 
                 else:
-                    weapons.fire_hot(offset, duration)
+                    weapons.fire_hot(offset, duration)  # 2.5x REAP-IR scope offset
             elif HighMode[Number]:
                 if(Flexible[Number]):
-                    weapons.fire(offset * (1 + counterRate[counter]*1.4), duration)
+                    weapons.fire(offset * (1 + counterRate[counter]*1.4), duration) # 1x-6x Variable zoom scope offset
                 else:
-                    weapons.fire_highmode(offset, duration)
+                    weapons.fire_highmode(offset, duration) # 4x zoom scope offset
             else:
                 # print(f"目前變數值: {counter}")
-                weapons.fire(offset, duration)
+                weapons.fire(offset, duration) # 1x offset
         time.sleep(0.001)
-def on_scroll(x, y, dx, dy):
+
+
+
+def on_scroll(x, y, dx, dy): # Used to detect mousewhell  (for variable zoome scope, it changes the anti-recoil offset)
     global counter, last_scroll_time
 
     if (keyboard.is_pressed('alt')):
@@ -98,9 +101,9 @@ def on_scroll(x, y, dx, dy):
         last_scroll_time[1] = last_scroll_time[0]
         last_scroll_time[0] = current_time
 
-# 啟動滾輪監聽器
+
 listener = Listener(on_scroll=on_scroll)
-listener.daemon = True  # 設置為守護進程
+listener.daemon = True  
 listener.start()
 
 if __name__ == '__main__':
