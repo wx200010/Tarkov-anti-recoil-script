@@ -6,11 +6,11 @@ import keyboard
 import weapons
 from pynput.mouse import Listener
 
-PrimaryWeapon = 'SR3M'.upper()  #  primary weapon's name
-SecondWeapon = 'SR3M'.upper()   #  secondary weapon's name
+PrimaryWeapon = 'sr3m'.upper()  #  primary weapon's name
+SecondWeapon = 'SPEAR'.upper()   #  secondary weapon's name
 
-Flexible = [True, True]     # True : variable zoom scope,    False: Non-variable zoom scope
-HighMode = [False, True]    # True : >1x scope,             False: 1x scope
+Flexible = [False, True]     # True : variable zoom scope,    False: Non-variable zoom scope
+HighMode = [False, False]    # True : >1x scope,             False: 1x scope
 counterRate = [0.5, 0.6, 0.75, 1.0, 1.35, 1.8, 2.4, 3.0, 4.1, 5.6 ] # the offset for variable zoom scope
 Number = 0          # The weapon index which you are using currently        
 counter = 0         # The current zoom level of your variable zoom scope  (approximate 0~9)
@@ -51,7 +51,7 @@ def main():
                 offset, duration = 5, 33
             # SMG's offset
             elif 'SR3M'     in Weapon:
-                offset, duration = 7, 26
+                offset, duration = 6, 26
             elif 'UZI'  in Weapon:
                 offset, duration = 7, 22
             elif 'MP7A2'    in Weapon:
@@ -60,7 +60,7 @@ def main():
                 offset, duration = 5, 22
         
             if 'HOT' in Weapon:        
-                if HighMode[Number]:
+                if not HighMode[Number]:
                     weapons.fire(offset, duration)      # 1x offset 
                 else:
                     weapons.fire_hot(offset, duration)  # 2.5x REAP-IR scope offset
